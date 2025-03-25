@@ -940,51 +940,8 @@ void stopDrawing() {
 void waitForRendering() {}
 
 void waitForScreen() {
-    setProfilingSectionMarkerCurrentFunction();
-    struct timespec counter;
-    static const auto frameMS = (1.0 / 60) * 1000;
-    const auto frameEndTime = gBookkeepingData.mFrameStartTime + frameMS;
-    clock_gettime(CLOCK_MONOTONIC, &counter);
-    auto waitTime = frameEndTime - (counter.tv_sec + (counter.tv_nsec / 1e9));
-    while (waitTime > 0) {
-        clock_gettime(CLOCK_MONOTONIC, &counter);
-        waitTime = frameEndTime - (counter.tv_sec + (counter.tv_nsec / 1e9));
-    }
-
-    clock_gettime(CLOCK_MONOTONIC, &counter);
-    const auto now = counter.tv_sec + (counter.tv_nsec / 1e9);
-    gBookkeepingData.mRealFramerate = 1000.0 / (now - gBookkeepingData.mRealFrameStartTime);
-    if (gBookkeepingData.mIsFrameSkippingEnabled)
-    {
-        const auto frameTime = now - gBookkeepingData.mRealFrameStartTime;
-        const auto drawTime = gBookkeepingData.mDrawingEndTime - gBookkeepingData.mDrawingStartTime;
-        const auto nonDrawTime = frameTime - drawTime;
-        static const auto EPSILON = 5;
-        if (now > frameEndTime + EPSILON) {
-            if (nonDrawTime < frameMS) {
-                gBookkeepingData.mIsSkippingNextFrameDrawCounter = (gBookkeepingData.mIsSkippingNextFrameDrawCounter + 1) % 10;
-                if (gBookkeepingData.mIsSkippingNextFrameDrawCounter)
-                {
-                    gBookkeepingData.mDrawingEndTime = gBookkeepingData.mDrawingStartTime = now;
-                }
-            }
-            else
-            {
-                gBookkeepingData.mIsSkippingNextFrameDrawCounter = 0;
-            }
-        }
-        else
-        {
-            gBookkeepingData.mIsSkippingNextFrameDrawCounter = 0;
-        }
-        gBookkeepingData.mFrameStartTime = frameEndTime;
-        gBookkeepingData.mRealFrameStartTime = now;
-    }
-    else
-    {
-        gBookkeepingData.mFrameStartTime = now;
-    }
-    setPrismDebugDropFrameCounter(gBookkeepingData.mIsSkippingNextFrameDrawCounter);
+	setProfilingSectionMarkerCurrentFunction();
+	gBookkeepingData.mRealFramerate = 60;
 }
 
 bool isSkippingDrawing()
